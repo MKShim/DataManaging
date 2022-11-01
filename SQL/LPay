@@ -1,0 +1,123 @@
+show global variables like 'local_infile';
+set global local_infile=true;
+
+create table Lpay.demo (
+cust varchar(20) DEFAULT NULL,
+ma_fem_dv varchar(20) DEFAULT NULL,
+ages varchar(20) DEFAULT NULL,
+zon_hlv varchar(20) DEFAULT NULL
+);
+
+load data local infile '/Users/minkyoung/Documents/SQL/LPAY/DEMO_euc.txt' 
+into table Lpay.demo 
+CHARACTER SET 'euckr'
+FIELDS 
+	TERMINATED BY ','
+	IGNORE 1 LINES;
+
+create table Lpay.PDDE (
+cust varchar(20) DEFAULT NULL,
+rct_no varchar(20) DEFAULT NULL,
+chnl_dv int DEFAULT NULL,
+cop_c varchar(20) DEFAULT NULL,
+br_c varchar(20) DEFAULT NULL,
+pd_c varchar(20) DEFAULT NULL,
+de_dt varchar(20) DEFAULT NULL,
+de_hr int DEFAULT NULL,
+buy_am float DEFAULT NULL,
+buy_ct int DEFAULT NULL
+);
+
+load data local infile '/Users/minkyoung/Documents/SQL/LPAY/PDDE.txt' 
+into table Lpay.PDDE 
+CHARACTER SET 'euckr'
+FIELDS 
+	TERMINATED BY ','
+	IGNORE 1 LINES;
+
+create table Lpay.COP (
+cust varchar(20) DEFAULT NULL,
+rct_no varchar(20) DEFAULT NULL,
+cop_c varchar(20) DEFAULT NULL,
+br_c varchar(20) DEFAULT NULL,
+chnl_dv int DEFAULT NULL,
+de_dt varchar(20) DEFAULT NULL,
+vst_dt varchar(20) DEFAULT NULL,
+de_hr int DEFAULT NULL,
+buy_am int DEFAULT NULL
+);
+
+load data local infile '/Users/minkyoung/Documents/SQL/LPAY/COP.txt' 
+into table Lpay.COP 
+CHARACTER SET 'euckr'
+FIELDS 
+	TERMINATED BY ','
+	IGNORE 1 LINES;
+
+create table Lpay.PD (
+pd_c varchar(20) DEFAULT NULL,
+pd_nm varchar(20) DEFAULT NULL,
+clac_hlv_nm varchar(20) DEFAULT NULL,
+clac_mcls_nm varchar(20) DEFAULT NULL
+);
+
+load data local infile '/Users/minkyoung/Documents/SQL/LPAY/PD.txt' 
+into table Lpay.PD 
+CHARACTER SET 'euckr'
+FIELDS 
+	TERMINATED BY ','
+	IGNORE 1 LINES;
+
+
+create table Lpay.BR (
+br_c varchar(20) DEFAULT NULL,
+cop_c varchar(20) DEFAULT NULL,
+zon_hlv varchar(20) DEFAULT NULL,
+zon_mcls varchar(20) DEFAULT NULL
+);
+
+load data local infile '/Users/minkyoung/Documents/SQL/LPAY/BR.txt' 
+into table Lpay.BR 
+CHARACTER SET 'euckr'
+FIELDS 
+	TERMINATED BY ','
+	IGNORE 1 LINES;
+
+
+
+select cust,CHNL_DV, count(RCT_NO) as count, sum(BUY_AM) as sum from Lpay.PDDE group by cust,CHNL_DV order by cust, count DESC,sum DESC;
+
+select sub.cust, MID(sub.DE_DT, 5, 2) as month, sub.CLAC_HLV_NM, sub.buy_ct, sub.buy_am from 
+(select * from Lpay.PDDE as a left join (select PD_C as PD_C2, CLAC_HLV_NM from Lpay.PD) as b on a.PD_C=b.PD_C2) as sub order by sub.cust;
+
+select a.cust, MID(a.DE_DT, 5, 2) as month, b.CLAC_HLV_NM, a.buy_ct, a.buy_am  from Lpay.PDDE as a left join Lpay.PD as b on a.PD_C=b.PD_C order by a.cust;
+
+select * from Lpay.PDDE;
+
+select * from Lpay.PDDE where cust='M003803545' order by de_dt;
+
+select cust from Lpay.PDDE left join Lpay.PD on Lpay.PDDE.PD_C=Lpay.PD.PD_C;
+
+set global sql_mode='';
+
+
+select a.cust, a.de_dt, a.rct_no, a.CHNL_DV, sum(a.buy_am), sum(a.buy_ct) from Lpay.PDDE a left join Lpay.PD b on a.PD_C=b.PD_C 
+group by a.cust, a.de_dt,a.rct_no, a.CHNL_DV order by a.cust, a.de_dt, a.rct_no ;
+
+ 
+select distinct a.cust, b.buy_ct from Lpay.PDDE a left join (select cust, buy_ct from Lpay.PDDE order by cust) b on a.cust=b.cust;
+
+
+
+FIELDS
+        TERMINATED BY '{field_terminator}'
+        OPTIONALLY ENCLOSED BY '"'
+        ESCAPED BY '' 
+    LINES TERMINATED BY '\n'
+
+    IGNORE 1 LINES;
+
+ALTER TABLE Lpay.demo MODIFY CUST MEDIUMTEXT;
+ALTER DATABASE Lpay DEFAULT CHARACTER SET utf8 ; 
+  
+
